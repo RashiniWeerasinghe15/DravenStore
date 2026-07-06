@@ -35,18 +35,14 @@ export default function Navbar() {
             </svg>
           </button>
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <svg width="28" height="22" viewBox="0 0 200 156" fill="none">
-              <path d="M10 30 H95 C108 30 116 36 122 46 L100 110 L78 46 C72 34 60 30 47 30 Z" fill="white" />
-              <path d="M190 30 H105 C118 30 128 38 132 50 C137 64 148 70 160 70 L190 30 Z" fill="white" />
-              <path d="M97 60 L100 130 L103 60 Z" fill="white" />
-              <polygon points="100,118 96,128 104,128" fill="#dc2626" />
-            </svg>
-            <span className="text-white font-bold tracking-[0.2em] text-sm hidden sm:block">
-              DRAVEN
-            </span>
-          </Link>
+         {/* Logo */}
+<Link href="/" className="flex items-center">
+  <img
+    src="/logo-white.png"
+    alt="DRAVEN"
+    className="h-10 w-auto"
+  />
+</Link>
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-7">

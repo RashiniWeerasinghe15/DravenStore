@@ -42,4 +42,64 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )}
           {product.originalPrice && (
-            <span className="text-[10px]
+            <span className="text-[10px] tracking-widest font-bold px-2 py-1 bg-red-700 text-white">
+              SALE
+            </span>
+          )}
+        </div>
+
+        {/* Wishlist button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            toggleWishlist(product.id);
+          }}
+          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill={liked ? "#dc2626" : "none"}
+            stroke={liked ? "#dc2626" : "white"}
+            strokeWidth="2"
+          >
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z" />
+          </svg>
+        </button>
+
+        {/* Quick view */}
+        <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          <Link
+            href={`/product/${product.id}`}
+            className="block w-full bg-white text-black text-center text-xs font-bold tracking-widest py-3 hover:bg-zinc-200 transition-colors"
+          >
+            VIEW PRODUCT
+          </Link>
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="pt-3 pb-6">
+        <p className="text-[11px] tracking-widest text-zinc-500 uppercase mb-1">
+          {product.fit}
+        </p>
+        <Link href={`/product/${product.id}`}>
+          <h3 className="text-sm font-medium text-white hover:text-zinc-300">
+            {product.name}
+          </h3>
+        </Link>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-sm text-white">
+            {fmt(product.price)}
+          </span>
+          {product.originalPrice && (
+            <span className="text-xs text-zinc-500 line-through">
+              {fmt(product.originalPrice)}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
