@@ -1,214 +1,149 @@
-"use client";
+import Image from "next/image";
+import Link from "next/link";
+import { getDbProductById } from "@/lib/products";
+import ProductActions from "@/components/ProductActions";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { getProductById } from "@/lib/products";
-import { Product } from "@/lib/types";
-import { useCart } from "@/context/CartContext";
-import { useAuth } from "@/context/AuthContext";
+const fmt = (n: number) => `LKR ${Number(n).toLocaleString("en-LK")}.00`;
 
-const fmt = (n: number) => `LKR ${n.toLocaleString("en-LK")}.00`;
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-const COLORS: Record<string, string> = {
-  Black: "#0a0a0a",
-  White: "#f5f5f5",
-  Red: "#7f1d1d",
-  Charcoal: "#374151",
-  Olive: "#4d4d33",
-};
+export default async function ProductDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  
+  let product = null;
+  let fetchError = null;
 
-export default function ProductPage() {
-  const { id } = useParams();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [imgIdx, setImgIdx] = useState(0);
-  const [size, setSize] = useState("");
-  const [color, setColor] = useState("");
-  const [toast, setToast] = useState("");
-  const { addToCart, setCartOpen } = useCart();
-  const { profile, toggleWishlist } = useAuth();
-
-  useEffect(() => {
-    getProductById(id as string).then((p) => {
-      setProduct(p);
-      if (p) setColor(p.colors[0]);
-      setLoading(false);
-    });
-  }, [id]);
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(""), 2500);
-  };
-
-  const handleAdd = () => {
-    if (!size) {
-      showToast("Please select a size");
-      return;
-    }
-    if (!product) return;
-    addToCart(product, size, color);
-    setCartOpen(true);
-  };
-
-  if (loading) {
-    return (
-      <div className="h-[60vh] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+  try {
+    product = await getDbProductById(id);
+  } catch (err: any) {
+    fetchError = err?.message || "Could not query database.";
   }
 
+  // Not Found State
   if (!product) {
     return (
-      <p className="text-center py-20 text-zinc-500">
-        Product not found.
-      </p>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-24 text-center text-white min-h-[60vh] flex flex-col items-center justify-center">
+        <h2 className="text-3xl font-black tracking-widest uppercase mb-4">PRODUCT NOT FOUND</h2>
+        <p className="text-zinc-500 text-sm max-w-md mb-8">
+          The product you are looking for does not exist in our system or might have been removed.
+        </p>
+        {fetchError && (
+          <div className="bg-red-950/20 border border-red-900/40 p-4 mb-6 rounded text-xs font-mono text-red-400 text-left max-w-md">
+            Diagnostic details: {fetchError}
+          </div>
+        )}
+        <Link
+          href="/"
+          className="bg-white text-black px-8 py-4 text-xs font-bold tracking-widest hover:bg-zinc-200 transition-colors uppercase"
+        >
+          BACK TO HOMEPAGE
+        </Link>
+      </div>
     );
   }
 
-  const liked = profile?.wishlist?.includes(product.id) ?? false;
+  const imageSrc = product.image_url || "/hero.jpg";
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-8 py-10 grid md:grid-cols-2 gap-10">
-
-      {/* Images */}
-      <div>
-        <div className="relative aspect-[4/5] bg-zinc-900 overflow-hidden">
-          <img
-            src={product.images[imgIdx]}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-        {product.images.length > 1 && (
-          <div className="flex gap-2 mt-3">
-            {product.images.map((img, i) => (
-              <button
-                key={i}
-                onClick={() => setImgIdx(i)}
-                className={`w-16 h-20 border-2 overflow-hidden ${
-                  imgIdx === i ? "border-white" : "border-white/20"
-                }`}
-              >
-                <img
-                  src={img}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Details */}
-      <div>
-        <p className="text-xs tracking-widest text-zinc-500 uppercase">
-          {product.fit}
-        </p>
-        <h1 className="text-2xl font-bold text-white mt-1">
-          {product.name}
-        </h1>
-        <div className="flex items-center gap-3 mt-3">
-          <span className="text-xl text-white font-semibold">
-            {fmt(product.price)}
-          </span>
-          {product.originalPrice && (
-            <span className="text-sm text-zinc-500 line-through">
-              {fmt(product.originalPrice)}
-            </span>
-          )}
-        </div>
-        <p className="text-zinc-400 text-sm mt-4 leading-relaxed">
-          {product.description}
-        </p>
-
-        {/* Color picker */}
-        <div className="mt-6">
-          <p className="text-xs font-bold tracking-widest text-zinc-400 mb-2">
-            COLOR — {color}
-          </p>
-          <div className="flex gap-2">
-            {product.colors.map((c) => (
-              <button
-                key={c}
-                onClick={() => setColor(c)}
-                className={`w-9 h-9 rounded-full border-2 ${
-                  color === c ? "border-white" : "border-white/20"
-                }`}
-                style={{ background: COLORS[c] || "#888" }}
-                title={c}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Size picker */}
-        <div className="mt-6">
-          <p className="text-xs font-bold tracking-widest text-zinc-400 mb-2">
-            SIZE {size ? `— ${size}` : ""}
-          </p>
-          <div className="flex gap-2 flex-wrap">
-            {product.sizes.map((s) => (
-              <button
-                key={s}
-                onClick={() => setSize(s)}
-                className={`w-12 h-11 text-xs font-bold border ${
-                  size === s
-                    ? "bg-white text-black border-white"
-                    : "border-white/30 text-white hover:border-white"
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="mt-8 flex gap-3">
-          <button
-            onClick={handleAdd}
-            className="flex-1 bg-white text-black font-bold text-xs tracking-widest py-4 hover:bg-zinc-200 transition-colors"
-          >
-            ADD TO CART
-          </button>
-          <button
-            onClick={() => toggleWishlist(product.id)}
-            className={`w-14 flex items-center justify-center border ${
-              liked
-                ? "border-red-600 bg-red-600/10"
-                : "border-white/30"
-            }`}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill={liked ? "#dc2626" : "none"}
-              stroke={liked ? "#dc2626" : "white"}
-              strokeWidth="2"
-            >
-              <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Extra info */}
-        <div className="mt-6 pt-6 border-t border-white/10 text-xs text-zinc-500 space-y-1">
-          <p>✓ 240GSM premium combed cotton</p>
-          <p>✓ Free island-wide delivery over LKR 10,000</p>
-          <p>✓ 7-day exchange policy</p>
+    <div className="bg-black text-white min-h-screen pb-24">
+      {/* Breadcrumbs */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 border-b border-white/5">
+        <div className="flex items-center gap-2 text-xs tracking-wider font-bold text-zinc-500 uppercase">
+          <Link href="/" className="hover:text-white transition-colors">Home</Link>
+          <span>/</span>
+          <span className="text-zinc-400">{product.category}</span>
+          <span>/</span>
+          <span className="text-white truncate max-w-[200px]">{product.name}</span>
         </div>
       </div>
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white text-black px-6 py-3 rounded-full shadow-2xl font-medium text-sm z-[100]">
-          {toast}
+      {/* Main Content Grid */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+          
+          {/* Left Column: Product Image */}
+          <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-950 border border-white/5">
+            <Image
+              src={imageSrc}
+              alt={product.name}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+              priority={true}
+            />
+            {product.stock === 0 && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+                <span className="text-sm font-black tracking-widest px-6 py-3 bg-red-950 border border-red-800 text-white uppercase">
+                  OUT OF STOCK
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Product Info */}
+          <div className="flex flex-col justify-start">
+            
+            {/* Header info */}
+            <div className="border-b border-white/10 pb-6 mb-6">
+              <span className="text-xs font-bold tracking-[0.2em] text-zinc-500 uppercase block mb-1">
+                {product.category} Collection
+              </span>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-wide text-white uppercase">
+                {product.name}
+              </h1>
+              <p className="text-xl font-mono text-white mt-3 font-semibold">
+                {fmt(product.price)}
+              </p>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-4 mb-8">
+              <h4 className="text-xs font-bold tracking-widest text-zinc-400 uppercase">
+                Product Details
+              </h4>
+              <p className="text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap">
+                {product.description || "Premium Draven garment. Designed with high-durability fabrics and tailoring for clean styling, streetwear aesthetics, and lasting fit."}
+              </p>
+            </div>
+
+            {/* Interactive Client selectors & Add to Cart button */}
+            <ProductActions product={product} />
+
+            {/* Shipping / Returns Accordion details */}
+            <div className="mt-12 border-t border-white/10 pt-8 space-y-6">
+              <div className="space-y-2">
+                <h5 className="text-xs font-bold tracking-widest text-white uppercase flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="1" y="3" width="15" height="13" />
+                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                    <circle cx="5.5" cy="18.5" r="2.5" />
+                    <circle cx="18.5" cy="18.5" r="2.5" />
+                  </svg>
+                  ISLAND-WIDE SHIPPING
+                </h5>
+                <p className="text-zinc-500 text-xs pl-6 leading-relaxed">
+                  Delivered in 2-4 business days across Sri Lanka. Free delivery on orders over LKR 10,000.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <h5 className="text-xs font-bold tracking-widest text-white uppercase flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                  </svg>
+                  EASY EXCHANGES
+                </h5>
+                <p className="text-zinc-500 text-xs pl-6 leading-relaxed">
+                  7-day exchanges on sizes. Garments must be unworn and in original packaging. Contact support to schedule.
+                </p>
+              </div>
+            </div>
+
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

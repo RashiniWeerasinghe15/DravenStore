@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
-import { CartProvider } from "@/context/CartContext";
 import Navbar from "@/components/Navbar";
-import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -25,16 +22,11 @@ export default function RootLayout({
         className={`${inter.className} bg-black text-white min-h-screen`}
         style={{ width: "100%", overflowX: "hidden" }}
       >
-        <AuthProvider>
-          <CartProvider>
-            <div style={{ width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-              <Navbar />
-              <CartDrawer />
-              <main style={{ flex: 1, width: "100%" }}>{children}</main>
-              <Footer />
-            </div>
-          </CartProvider>
-        </AuthProvider>
+        <div style={{ width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+          <Navbar />
+          <main style={{ flex: 1, width: "100%" }}>{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   );

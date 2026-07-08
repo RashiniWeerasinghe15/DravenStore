@@ -1,57 +1,61 @@
-import {
-  collection,
-  getDocs,
-  getDoc,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { Product, Gender } from "@/lib/types";
+import { supabase } from "@/lib/supabaseClient";
+import { DbProduct } from "@/lib/types";
 
-const PRODUCTS_COL = "products";
+/**
+ * Fetch all products from Supabase products table
+ */
+export async function getDbProducts(): Promise<DbProduct[]> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-export async function getAllProducts(): Promise<Product[]> {
-  const snap = await getDocs(collection(db, PRODUCTS_COL));
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Product));
+  if (error) {
+    console.error("Error fetching products from Supabase:", error);
+    throw error;
+  }
+
+  return data || [];
 }
 
-export async function getProductsByGender(gender: Gender): Promise<Product[]> {
-  const q = query(
-    collection(db, PRODUCTS_COL),
-    where("gender", "==", gender)
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Product));
+/**
+ * Fetch a single product by ID from Supabase products table
+ */
+export async function getDbProductById(id: string): Promise<DbProduct | null> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      // PGRST116 is postgrest error for 0 rows returned when using .single()
+      return null;
+    }
+    console.error(`Error fetching product ${id} from Supabase:`, error);
+    throw error;
+  }
+
+  return data;
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
-  const ref = doc(db, PRODUCTS_COL, id);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() } as Product;
-}
+/**
+ * Fetch products by category from Supabase products table
+ */
+export async function getDbProductsByCategory(
+  category: string
+): Promise<DbProduct[]> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("category", category)
+    .order("created_at", { ascending: false });
 
-export async function addProduct(
-  product: Omit<Product, "id">
-): Promise<string> {
-  const docRef = await addDoc(collection(db, PRODUCTS_COL), {
-    ...product,
-    createdAt: Date.now(),
-  });
-  return docRef.id;
-}
+  if (error) {
+    console.error(`Error fetching products for category ${category} from Supabase:`, error);
+    throw error;
+  }
 
-export async function updateProduct(
-  id: string,
-  data: Partial<Product>
-): Promise<void> {
-  await updateDoc(doc(db, PRODUCTS_COL, id), data);
-}
-
-export async function deleteProduct(id: string): Promise<void> {
-  await deleteDoc(doc(db, PRODUCTS_COL, id));
+  return data || [];
 }

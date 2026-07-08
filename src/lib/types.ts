@@ -58,3 +58,14 @@ export interface UserProfile {
   wishlist: string[];
   createdAt: number;
 }
+
+export interface DbProduct {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  image_url: string | null;
+  category: string;
+  stock: number;
+  created_at?: string;
+}
