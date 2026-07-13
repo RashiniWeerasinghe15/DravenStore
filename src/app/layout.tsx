@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { StoreProvider } from "@/lib/store";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,11 +23,13 @@ export default function RootLayout({
         className={`${inter.className} bg-black text-white min-h-screen`}
         style={{ width: "100%", overflowX: "hidden" }}
       >
-        <div style={{ width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-          <Navbar />
-          <main style={{ flex: 1, width: "100%" }}>{children}</main>
-          <Footer />
-        </div>
+        <StoreProvider>
+          <div style={{ width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+            <Navbar />
+            <main style={{ flex: 1, width: "100%" }}>{children}</main>
+            <Footer />
+          </div>
+        </StoreProvider>
       </body>
     </html>
   );

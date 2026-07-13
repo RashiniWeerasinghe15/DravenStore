@@ -135,15 +135,15 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-20">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
+      <section className="max-w-[1600px] mx-auto px-6 md:px-12 lg:px-16 py-28">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-16 gap-6">
           <div>
             <span className="text-zinc-500 text-xs font-bold tracking-[0.2em] uppercase">CURATED COLLECTION</span>
-            <h2 className="text-white text-3xl font-extrabold tracking-wide mt-1">
+            <h2 className="text-white text-3xl md:text-4xl font-extrabold tracking-wide mt-2">
               New Drops {useFallback && <span className="text-[10px] text-zinc-600 font-mono italic">(Local Mock Data)</span>}
             </h2>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-6">
             <Link
               href="/test-db"
               className="text-xs tracking-widest text-zinc-500 hover:text-white border-b border-zinc-900 hover:border-white pb-1 transition-all duration-300"
@@ -160,7 +160,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {featured.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -168,9 +168,9 @@ export default async function HomePage() {
       </section>
 
       {/* Brand Ethos / Features Section */}
-      <section className="bg-zinc-950 border-t border-b border-white/10 py-20">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+      <section className="bg-zinc-950 border-t border-b border-white/10 py-28">
+        <div className="max-w-[1600px] mx-auto px-6 md:px-12 lg:px-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 text-center md:text-left">
             {[
               {
                 t: "240GSM Heavyweight Cotton",
@@ -185,9 +185,9 @@ export default async function HomePage() {
                 d: "Fast, tracked shipping island-wide, wrapped entirely in sustainable, biodegradable custom packaging.",
               },
             ].map((f, i) => (
-              <div key={i} className="flex flex-col gap-3">
+              <div key={i} className="flex flex-col gap-4">
                 <span className="text-zinc-600 text-xs font-bold tracking-[0.2em]">0{i + 1} / FEATURE</span>
-                <h3 className="text-white font-extrabold text-lg tracking-wider">
+                <h3 className="text-white font-extrabold text-xl tracking-wider">
                   {f.t}
                 </h3>
                 <p className="text-zinc-400 text-sm leading-relaxed">{f.d}</p>

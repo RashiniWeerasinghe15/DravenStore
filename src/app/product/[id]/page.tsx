@@ -49,7 +49,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   return (
     <div className="bg-black text-white min-h-screen pb-24">
       {/* Breadcrumbs */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 border-b border-white/5">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-6 border-b border-white/5">
         <div className="flex items-center gap-2 text-xs tracking-wider font-bold text-zinc-500 uppercase">
           <Link href="/" className="hover:text-white transition-colors">Home</Link>
           <span>/</span>
@@ -60,8 +60,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
       </div>
 
       {/* Main Content Grid */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
           
           {/* Left Column: Product Image */}
           <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-950 border border-white/5">

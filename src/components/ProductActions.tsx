@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { DbProduct } from "@/lib/types";
+import { useStore } from "@/lib/store";
 
 export default function ProductActions({ product }: { product: DbProduct }) {
   const [selectedSize, setSelectedSize] = useState<string>("M");
   const [selectedColor, setSelectedColor] = useState<string>("Black");
   const [qty, setQty] = useState<number>(1);
   const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+  const { addToCart } = useStore();
 
   const sizes = ["S", "M", "L", "XL"];
   const colors = [
@@ -18,10 +21,22 @@ export default function ProductActions({ product }: { product: DbProduct }) {
 
   const handleAddToCart = () => {
     setAdding(true);
+    
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image_url || "/hero.jpg",
+      size: selectedSize,
+      color: selectedColor,
+      qty: qty
+    }, product.stock);
+
     setTimeout(() => {
       setAdding(false);
-      alert(`Added to Cart:\n- 1x ${product.name}\n- Size: ${selectedSize}\n- Color: ${selectedColor}`);
-    }, 1200);
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
+    }, 1000);
   };
 
   return (
@@ -96,10 +111,12 @@ export default function ProductActions({ product }: { product: DbProduct }) {
         {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
-          disabled={adding}
+          disabled={adding || added}
           className={`flex-1 h-14 text-xs font-black tracking-widest uppercase transition-all duration-300 ${
             adding
               ? "bg-zinc-800 text-zinc-400 border border-zinc-700 cursor-not-allowed"
+              : added
+              ? "bg-emerald-950 text-emerald-400 border border-emerald-800 cursor-default"
               : "bg-white text-black border border-white hover:bg-zinc-200"
           }`}
         >
@@ -110,6 +127,13 @@ export default function ProductActions({ product }: { product: DbProduct }) {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
               ADDING TO BAG...
+            </span>
+          ) : added ? (
+            <span className="flex items-center justify-center gap-2 font-bold">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              ADDED TO BAG
             </span>
           ) : (
             "ADD TO BAG"

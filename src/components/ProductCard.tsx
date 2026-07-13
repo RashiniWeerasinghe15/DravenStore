@@ -4,16 +4,36 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { DbProduct } from "@/lib/types";
+import { useStore } from "@/lib/store";
 
 const fmt = (n: number) => `LKR ${Number(n).toLocaleString("en-LK")}.00`;
 
 export default function ProductCard({ product }: { product: DbProduct }) {
   const [adding, setAdding] = useState(false);
+  const { addToCart, toggleWishlist, isInWishlist } = useStore();
+
+  const isFav = isInWishlist(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigating to detail page when clicking the button
+    e.preventDefault();
     setAdding(true);
-    setTimeout(() => setAdding(false), 1500);
+    
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image_url || "/hero.jpg",
+      size: "M",
+      color: "Black",
+    }, product.stock);
+
+    setTimeout(() => setAdding(false), 1200);
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product.id);
   };
 
   const imageSrc = product.image_url || "/hero.jpg";
@@ -38,6 +58,25 @@ export default function ProductCard({ product }: { product: DbProduct }) {
             {product.category}
           </span>
         </div>
+
+        {/* Wishlist Heart Toggle */}
+        <button
+          onClick={handleWishlistToggle}
+          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-sm flex items-center justify-center border border-white/10 hover:border-white/20 transition-all active:scale-95"
+          aria-label={isFav ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill={isFav ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth="2"
+            className={`transition-colors ${isFav ? "text-white" : "text-zinc-400 hover:text-white"}`}
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </button>
 
         {/* Low Stock Indicator */}
         {product.stock <= 5 && product.stock > 0 && (
@@ -83,7 +122,7 @@ export default function ProductCard({ product }: { product: DbProduct }) {
             }`}
           >
             {adding ? (
-              <span className="flex items-center justify-center gap-1.5">
+              <span className="flex items-center justify-center gap-1.5 font-bold">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                   <path d="M20 6 9 17l-5-5" />
                 </svg>
